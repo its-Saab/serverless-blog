@@ -1,6 +1,7 @@
 //npm packages
 import { Card } from "react-bootstrap";
 import Link from "next/link";
+import moment from 'moment'
 //project files
 import { urlFor } from "lib/api";
 
@@ -22,7 +23,7 @@ export const CardItem = ({
 						<Card.Title className="font-weight-bold mb-1">
 							{author?.name}
 						</Card.Title>
-						<Card.Text className="card-date">{date}</Card.Text>
+						<Card.Text className="card-date">{moment(date).format('LL')}</Card.Text>
 					</div>
 				</Card.Header>
 				<div className="view overlay">
