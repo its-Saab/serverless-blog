@@ -1,44 +1,46 @@
 //npm packages
-import { Row, Col } from "react-bootstrap";
+import { Row, Button } from "react-bootstrap";
 import { useState } from "react";
-
 //project files
 import { PageWrapper } from "components/PageWrapper";
 import { AuthorIntro } from "components/AuthorIntro";
-import { CardListItem } from "components/CardListItem";
-import { CardItem } from "components/CardItem";
-import { getAllBlogs } from "lib/api";
+import { getPaginatedBlogs } from "lib/api";
 import { MenuFilter } from "components/MenuFilter";
+import { useGetBlogsPages } from "actions/Pagination";
+import { BlogsList } from "components/BlogsList";
 
 export default function Home({ blogs }) {
 	const [filteredView, setFilteredView] = useState({
-		view: { list: false },
+		view: { list: 0 },
+		date: { asc: 0 },
 	});
 
-	let blogItem = blogs.map((blog) => {
-		return filteredView.view.list ? (
-			<Col md="10" key={`${blog.slug}-list`}>
-				<CardListItem blog={blog} />
-			</Col>
-		) : (
-			<Col md="4" key={blog.slug}>
-				<CardItem blog={blog} />;
-			</Col>
-		);
-	});
-
+	const { data, size, setSize, hitEnd } = useGetBlogsPages({ filteredView });
+console.log(data)
 	return (
 		<PageWrapper>
 			<AuthorIntro />
 			<MenuFilter
-				view={filteredView.view.list}
-				onChange={(e) => {
-					return setFilteredView({ view: { list: !filteredView.view.list } });
+				filter={filteredView}
+				onChange={(option, value) => {
+					return setFilteredView({ ...filteredView, [option]: value });
 				}}
 			/>
 			<hr />
-			{/* {JSON.stringify(blogs)} */}
-			<Row className="mb-5">{blogItem}</Row>
+			<Row className="mb-5">
+				<BlogsList data={data || [blogs]} filter={filteredView} />
+			</Row>
+			<div style={{ textAlign: "center" }}>
+				<Button
+					onClick={() => setSize(size + 1)}
+					disabled={hitEnd}
+					size="lg"
+					variant="outline-secondary"
+				>
+					{/* {isLoadingMore ? '...' : isReachingEnd ? 'No more blogs' : 'More Blogs'} */}
+					Load More
+				</Button>
+			</div>
 		</PageWrapper>
 	);
 }
@@ -51,7 +53,7 @@ export default function Home({ blogs }) {
 //Provides props to your page
 //it will create a static page
 export async function getStaticProps() {
-	const blogs = await getAllBlogs();
+	const blogs = await getPaginatedBlogs({ offset: 0, date: "desc" });
 	return {
 		props: {
 			blogs,
