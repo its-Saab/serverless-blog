@@ -1,15 +1,26 @@
 //npm packages
 import { Row, Col } from "react-bootstrap";
+import { useState } from "react";
+
 //project files
 import { PageWrapper } from "components/PageWrapper";
 import { AuthorIntro } from "components/AuthorIntro";
 import { CardListItem } from "components/CardListItem";
 import { CardItem } from "components/CardItem";
 import { getAllBlogs } from "lib/api";
+import { MenuFilter } from "components/MenuFilter";
 
 export default function Home({ blogs }) {
+	const [filteredView, setFilteredView] = useState({
+		view: { list: false },
+	});
+
 	let blogItem = blogs.map((blog) => {
-		return (
+		return filteredView.view.list ? (
+			<Col md="10" key={`${blog.slug}-list`}>
+				<CardListItem blog={blog} />
+			</Col>
+		) : (
 			<Col md="4" key={blog.slug}>
 				<CardItem blog={blog} />;
 			</Col>
@@ -19,21 +30,18 @@ export default function Home({ blogs }) {
 	return (
 		<PageWrapper>
 			<AuthorIntro />
+			<MenuFilter
+				view={filteredView.view.list}
+				onChange={(e) => {
+					return setFilteredView({ view: { list: !filteredView.view.list } });
+				}}
+			/>
 			<hr />
-			{JSON.stringify(blogs)}
-			<Row className="mb-5">
-				{/* <Col md="10">
-					<CardListItem />
-				</Col> */}
-
-				{blogItem}
-			</Row>
+			{/* {JSON.stringify(blogs)} */}
+			<Row className="mb-5">{blogItem}</Row>
 		</PageWrapper>
 	);
 }
-
-
-
 
 //Static Page
 //Faster, can be cached using CDN
