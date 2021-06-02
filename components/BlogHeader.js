@@ -1,8 +1,7 @@
 //npm packages
-
+import moment from "moment";
 //project files
-import {urlFor} from 'lib/api'
-
+import { urlFor } from "lib/api";
 
 export default function BlogHeader({
 	blog: { title, subtitle, coverImage, date, author },
@@ -18,7 +17,7 @@ export default function BlogHeader({
 					alt="avatar"
 				/>
 				{author?.name}
-				{", "} {date}
+				{", "} {moment(date).format('LL')}
 			</p>
 			<h1 className="font-weight-bold blog-detail-header-title mb-0">
 				{title}
