@@ -1,13 +1,19 @@
 //npm packages
 import { Row, Col } from "react-bootstrap";
+import { useRouter } from "next/router";
 //project files
 import { PageWrapper } from "components/PageWrapper";
-import { getAllBlogs, getBlogBySlug } from "lib/api";
+import { getBlogBySlug, getAllBlogs } from "lib/api";
 import { BlogContent } from "components/BlogContent";
 import BlogHeader from "components/BlogHeader";
 
 //with slugs export default function is required
-export default function BlogDetails({ blog }) {
+export default function BlogDetails({ blog, preview }) {
+	const router = useRouter();
+
+	if (router.isFallback) {
+		return <PageLayout className="blog-detail-page">Loading...</PageLayout>;
+	}
 	return (
 		<PageWrapper className="blog-detail-page">
 			<Row>
@@ -31,18 +37,19 @@ export default function BlogDetails({ blog }) {
 
 //static
 //for static props to work with dynamic routes it needs getStaticPaths
-export async function getStaticProps({ params }) {
-	const blog = await getBlogBySlug(params.slug);
+export async function getStaticProps({ params, preview = false, previewData }) {
+	const blog = await getBlogBySlug(params.slug, preview);
 	return {
-		props: { blog },
+		props: { blog, preview },
+
 	};
 }
 
 export async function getStaticPaths() {
 	const blogs = await getAllBlogs();
-
+	const paths = blogs?.map((blog) => ({params: {slug: blog.slug}}));
 	return {
-		paths: blogs?.map((blog) => ({ params: { slug: blog.slug } })),
+		paths,
 		fallback: false,
 	};
 }
